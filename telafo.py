@@ -3,15 +3,10 @@
 # Website:   http://man-va-code.ir
 # GitHub:    https://github.com/man-va-code
 # Instagram: https://instagram.com/man_va_code
-# Eitaa:     https://eitaa.com/man_va_code
-# Twitter:   https://twitter.com/man_va_code
-# Soroush:   https://what.sapp.ir/man_va_code
 # Rubika:    https://rubika.ir/man_va_code
-# Youtube:   https://youtube.com/channel/UCZahV_BJmf83ybUd6krfClA
 # Virgool:   https://virgool.io/@man_va_code
-# Facebook:  https://facebook.com/man.va.code
 # Aparat:    https://aparat.com/man_va_code
-# Telegram:  https://t.me/man_va_code
+# Email:     manvacode@chmail.ir
 #
 # this app uses a fork of " https://github.com/tdlib/td " version " v1.7.0 " and i just change some part of it
 # for forward and view new messages that this telegram client recive from server.
@@ -25,6 +20,7 @@ from ctypes import CDLL, c_int, c_char_p, c_double, CFUNCTYPE
 import json
 import sys
 import time
+import datetime
 import os.path
 import platform
 
@@ -118,9 +114,13 @@ td_send({'@type': 'getAuthorizationState', '@extra': 1.01234})
 
 base_message_id = 0
 message_id = 0
-rotate_step = 1
+rotate_step = [1,1]
 idle_counter = 0
+not_event_controller = [1,1]
 file_name = "config.txt"
+forward_counter = 0
+reset_timer_controller = 1
+original_base_time = datetime.datetime.now().minute
 
 #################################################
 
@@ -190,60 +190,103 @@ def config_read_write(file_name, config_name):
 
 # draw rotating line function
 
-def draw_rotating_line(rotate_step):
+def draw_rotating_line(rotate_step, show_done):
 
-    if(rotate_step == 4):
-        sys.stdout.write('\\')
-        sys.stdout.write('\b')
-        sys.stdout.flush()
+    sys.stdout.write('\r             \rWorking ')
+    sys.stdout.flush()
+
+    if (rotate_step == 1 and show_done == 1):
+        sys.stdout.write('|\b')
+        rotate_step = 2
+        show_done = 0
+
+    if(rotate_step == 2 and show_done == 1):
+        sys.stdout.write('/\b')
+        rotate_step = 3
+        show_done = 0
+
+    if(rotate_step == 3 and show_done == 1):
+        sys.stdout.write('-\b')
+        rotate_step = 4
+        show_done = 0
+
+    if(rotate_step == 4 and show_done == 1):
+        sys.stdout.write('\\\b')
         rotate_step = 1
 
-    if(rotate_step == 3):
-        sys.stdout.write('-')
-        sys.stdout.write('\b')
-        sys.stdout.flush()
-        rotate_step = 4
+    show_done = 1
+    sys.stdout.flush()
+    return ([rotate_step, show_done])
 
-    if(rotate_step == 2):
-        sys.stdout.write('/')
-        sys.stdout.write('\b')
-        sys.stdout.flush()
-        rotate_step = 3
+################################################## 
+ 
+# not event with counter function
 
-    if (rotate_step == 1):
-        sys.stdout.write('|')
-        sys.stdout.write('\b')
-        sys.stdout.flush()
-        rotate_step = 2
+def not_event_counter(idle_counter):
 
-    return (rotate_step)
+    sys.stdout.write('\rWaiting ')
+    sys.stdout.flush()
 
-#################################################
-
-# not event counter function
-
-def not_event(idle_counter):
     idle_counter += 1
+
     if (idle_counter <= 9):
-        sys.stdout.write('# ')
+        if (idle_counter % 2 == 0):
+            sys.stdout.write('# ')
+        else:
+            sys.stdout.write('@ ')
         sys.stdout.write(str(idle_counter))
         sys.stdout.write('\b\b\b')
-        #sys.stdout.flush()
 
     if (idle_counter > 9 and idle_counter <= 99):
-        sys.stdout.write('# ')
+        if (idle_counter % 2 == 0):
+            sys.stdout.write('# ')
+        else:
+            sys.stdout.write('@ ')        
         sys.stdout.write(str(idle_counter))
         sys.stdout.write('\b\b\b\b')
-        #sys.stdout.flush()
 
     if(idle_counter == 100):
         sys.stdout.write('# 100')
-        sys.stdout.write('\nDone.')
+        sys.stdout.write('\n\nDone.\nExit.\n\n')
         sys.stdout.flush()
         sys.exit()
 
     sys.stdout.flush()
     return (idle_counter)
+
+#################################################
+
+# not event without counter function
+
+def not_event(rotate_step, show_done):
+
+    sys.stdout.write('\rWaiting ')
+    sys.stdout.flush()
+
+    if(rotate_step == 2 and show_done == 1):
+        sys.stdout.write('#\b')
+        rotate_step = 1
+        show_done = 0
+
+    if (rotate_step == 1 and show_done == 1):
+        sys.stdout.write('@\b')
+        rotate_step = 2
+
+    sys.stdout.flush()
+    show_done = 1
+    return([rotate_step,show_done])
+
+#################################################
+
+# exit function
+def except_exit_func():
+
+    print ("\n\nForce Stop.")
+    print ("Exit.\n\n")
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
 
 #################################################
 
@@ -258,14 +301,22 @@ my_chat_id = config_read_write(file_name , "chat_id")
 
 try:
     run_mode = None
-    run_mode = input("Please select run mode:\n'1' -> Sync\n'5' -> Sync & View\n'9' -> Sync & View & Forward : ")
-    sys.stdout.write('Working ')
+    use_mode = None
+
+    run_mode = input("\nPlease select run mode:\n'1' -> Auto OFF\n'9' -> Always ON : ")
+    while (run_mode not in ['1','9']):
+        run_mode = input("Please select Valid Value: ")
+    
+    print ("--------------------------------")
+
+    use_mode = input("Please select use mode:\n'1' -> Sync\n'5' -> Sync & View\n'9' -> Sync & View & Forward : ")
+    while (use_mode not in ['1','5','9']):
+        use_mode = input("Please select Valid Value: ")
+
+    print ("--------------------------------")
+
 except (KeyboardInterrupt):
-    print ("\nExit")
-    try:
-        sys.exit(0)
-    except SystemExit:
-        os._exit(0)
+    except_exit_func()
 
 #################################################
 
@@ -278,18 +329,23 @@ try:
         event = td_receive()
 
         # call draw_rotating_line function when app is working
-        rotate_step = draw_rotating_line(rotate_step)
+        rotate_step = draw_rotating_line(rotate_step[0],rotate_step[1])
 
-        #call not_event when app is idle and then, exit after some time
+        #call this functoins when app is idle
         if (not event):
-            idle_counter = not_event(idle_counter)
-
+            if (run_mode == '1'):
+                idle_counter = not_event_counter(idle_counter)
+            if (run_mode == '9'):
+                not_event_controller=not_event(not_event_controller[0], not_event_controller[1])
 
         # timer for normalising app working speed and decrease process pressure on system
         time.sleep(0.3)
 
         # if app recive an event
         if event:
+
+            idle_counter = 0
+
             # process authorization states
             if event['@type'] == 'updateAuthorizationState':
                 auth_state = event['authorization_state']
@@ -339,11 +395,11 @@ try:
                     td_send({'@type': 'checkAuthenticationPassword', 'password': password})
 
             # sync
-            if ((run_mode != '5') or (run_mode != '9')):
+            if (use_mode == '1'):
                 None
 
             # sync & view
-            if (run_mode == '5'):
+            if (use_mode == '5'):
                 if (event['@type']=='updateNewMessage'):
                     chat_id = str(event['message']['chat_id'])
                     message_id = event['message']['id']
@@ -353,19 +409,72 @@ try:
                     td_send({'@type': 'viewMessages', 'chat_id': chat_id, 'message_thread_id': 0, 'message_ids': [message_id], 'force_read': 1 })
 
             # sync & view & forward
-            if (run_mode == '9'):
-                if (event['@type']=='updateNewMessage'):
-                    chat_id = str(event['message']['chat_id'])
-                    message_id = event['message']['id']
+            if (use_mode == '9'):
+
+                new_time = datetime.datetime.now().minute
+                
+                if (forward_counter < 2000):
+                    if (event['@type']=='updateNewMessage'):
+                        chat_id = str(event['message']['chat_id'])
+                        message_id = event['message']['id']
 
                 if (message_id != base_message_id and chat_id != my_chat_id):
                     base_message_id = message_id
                     td_send({'@type': 'forwardMessages', 'chat_id': my_chat_id, 'from_chat_id': chat_id, 'message_ids': [message_id] })
                     td_send({'@type': 'viewMessages', 'chat_id': chat_id, 'message_thread_id': 0, 'message_ids': [message_id], 'force_read': 1 })
+                    forward_counter += 1                        
+
+                if (forward_counter >= 2000):
+
+                    message_hour = datetime.datetime.now().hour
+
+                    if (message_hour == 23):
+                        message_hour = 0
+                    else:
+                        message_hour += 1
+                    
+                    if ( new_time == 55 ):
+                        message_minute = 0
+                    elif ( new_time == 56 ):
+                        message_minute = 1
+                    elif ( new_time == 57 ):
+                        message_minute = 2
+                    elif ( new_time == 58 ):
+                        message_minute = 3
+                    elif ( new_time == 59 ):
+                        message_minute = 4
+                    elif ( new_time == 0 ):
+                        message_minute = 5
+                    else:
+                        message_minute = new_time + 5
+
+                    if(message_hour < 10):
+                        message_hour = ('0' + str(message_hour))
+
+                    if(message_minute < 10):
+                        message_minute = ('0' + str(message_minute))
+
+                    sys.stdout.write('\r             \r')
+                    sys.stdout.flush()
+
+                    message = ("Telegram Forward Limit For One Hour. App Continue Working at "+str(message_hour)+":"+str(message_minute)+' .')
+                    sys.stdout.write(message)
+                    sys.stdout.flush()
+                    time.sleep(3900) # sleep for 65 minute
+                    original_base_time = datetime.datetime.now().minute
+                    forward_counter = 0
+                    sys.stdout.write('\r')
+                    sys.stdout.flush()
+                    for n in range(len (message) ):
+                        sys.stdout.write(' ')
+                        sys.stdout.flush()
+
+                if (((original_base_time - 1) == new_time) and (reset_timer_controller == 1)):
+                    forward_counter = 0
+                    reset_timer_controller = 0
+
+                if (((original_base_time) == new_time) and (reset_timer_controller == 0)):
+                    reset_timer_controller = 1
 
 except (KeyboardInterrupt):
-    print ("\nExit")
-    try:
-        sys.exit(0)
-    except SystemExit:
-        os._exit(0)
+    except_exit_func()
