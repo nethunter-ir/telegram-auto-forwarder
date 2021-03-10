@@ -444,6 +444,7 @@ try:
                     password = getpass('Please enter your Password (hidden typing): ')
                     password = hidden_input_value_checker("Password", password)
                     td_send({'@type': 'checkAuthenticationPassword', 'password': password})
+                    print ("--------------------------------")
 
             # sync
             if (use_mode == '1'):
