@@ -465,15 +465,16 @@ try:
                 new_time = datetime.datetime.now().minute
                 
                 if (forward_counter < 2000):
+                    
                     if (event['@type']=='updateNewMessage'):
                         chat_id = str(event['message']['chat_id'])
                         message_id = event['message']['id']
 
-                if (message_id != base_message_id and chat_id != my_chat_id):
-                    base_message_id = message_id
-                    td_send({'@type': 'forwardMessages', 'chat_id': my_chat_id, 'from_chat_id': chat_id, 'message_ids': [message_id] })
-                    td_send({'@type': 'viewMessages', 'chat_id': chat_id, 'message_thread_id': 0, 'message_ids': [message_id], 'force_read': 1 })
-                    forward_counter += 1                        
+                        if (chat_id != my_chat_id):
+                            base_message_id = message_id
+                            td_send({'@type': 'forwardMessages', 'chat_id': my_chat_id, 'from_chat_id': chat_id, 'message_ids': [message_id] })
+                            td_send({'@type': 'viewMessages', 'chat_id': chat_id, 'message_thread_id': 0, 'message_ids': [message_id], 'force_read': 1 })
+                            forward_counter += 1                        
 
                 if (forward_counter >= 2000):
 
