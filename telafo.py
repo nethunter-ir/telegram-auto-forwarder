@@ -1,12 +1,11 @@
-# "Telegram Auto Forwarder" From "MaCo"
+# "Telegram Auto Forwarder" From "MahYad"
 #
-# Website:   http://man-va-code.ir
-# GitHub:    https://github.com/man-va-code
-# Instagram: https://instagram.com/man_va_code
-# Rubika:    https://rubika.ir/man_va_code
-# Virgool:   https://virgool.io/@man_va_code
-# Aparat:    https://aparat.com/man_va_code
-# Email:     manvacode@chmail.ir
+# Website:   http://mahyad.net
+# GitHub:    https://github.com/mahyadnet
+# Instagram: https://instagram.com/mahyadnet
+# Twitter:   https://twitter.com/mahyadnet
+# Virgool:   https://virgool.io/@mahyadnet
+# Email:     mahyadnet@gmail.com
 #
 # this app uses a fork of " https://github.com/tdlib/td " version " v1.7.0 " and i just change some part of it
 # for forward and view new messages that this telegram client recive from server.
@@ -305,9 +304,7 @@ def not_event(rotate_step, show_done):
 
 # exit function
 def except_exit_func():
-
-    print ("\n\nForce Stop.")
-    print ("Exit.\n\n")
+    print ("\n\nForce Stop." + '\n' + "Exit.\n\n" )
     try:
         sys.exit(0)
     except SystemExit:
